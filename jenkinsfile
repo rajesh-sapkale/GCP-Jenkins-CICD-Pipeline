@@ -23,13 +23,14 @@ spec:
 """
   ) {
   node(label) {
-      stage('checkout') {        
+      stage('checkout') {
         }
       stage('build') {
-          container('maven')
+          container('maven') {
             git 'https://github.com/rajesh-sapkale/spring-petclinic.git'
             sh 'mvn clean package'
             junit '**/target/surefire-reports/TEST-*.xml'
+        }
       }
     }
   }
