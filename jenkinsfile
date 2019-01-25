@@ -30,6 +30,7 @@ spec:
       }
       stage('build') {
         container('maven') {
+          git 'https://github.com/rajesh-sapkale/spring-petclinic.git'
           sh 'mvn clean package'
           junit '**/target/surefire-reports/TEST-*.xml'
         }
