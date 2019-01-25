@@ -30,10 +30,12 @@ spec:
           }
         }
       stage('build') {
-        container('maven')
-          sh 'mvn clean package'
-          junit '**/target/surefire-reports/TEST-*.xml'
+        steps {
+          container('maven')
+            sh 'mvn clean package'
+            junit '**/target/surefire-reports/TEST-*.xml'
+        }
       }
     }
-}
+  }
 }
