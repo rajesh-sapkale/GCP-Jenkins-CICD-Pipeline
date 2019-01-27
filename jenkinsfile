@@ -23,15 +23,24 @@ spec:
       stage('Git checkout	') {
           git 'https://github.com/rajesh-sapkale/spring-petclinic.git'
       }
+      stage('Static code analysis') {
+
+      }
       stage('Build app') {
           sh 'mvn clean package'
       }
       stage('Test') {
           junit '**/target/surefire-reports/TEST-*.xml'
       }
+      stage('Code coverage') {
+
+      }
       stage('Push to artifactory') {
           archiveArtifacts artifacts:'target/*.jar', fingerprint:true
           //Push to artifactory
+      }
+      stage('Dockerimage push') {
+
       }
     }
   }
