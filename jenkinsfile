@@ -1,6 +1,6 @@
-def slavepod = "maven-${UUID.randomUUID().toString()}"
+def slavepod = "slavepod-${UUID.randomUUID().toString()}"
 
-podTemplate(label: label, yaml: """
+podTemplate(label: slavepod, yaml: """
 apiVersion: v1
 kind: Pod
 metadata:
