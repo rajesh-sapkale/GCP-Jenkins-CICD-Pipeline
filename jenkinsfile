@@ -1,7 +1,3 @@
-/**
- * This pipeline will execute a simple Maven build using a pod template in yaml
- */
-
 def label = "maven-${UUID.randomUUID().toString()}"
 
 podTemplate(label: label, yaml: """
@@ -23,13 +19,20 @@ spec:
 """
   ) {
   node(label) {
-      stage('checkout') {
+    container('maven') {
+      stage('Git checkout	') {
           git 'https://github.com/rajesh-sapkale/spring-petclinic.git'
       }
-      stage('build') {
-          git 'https://github.com/rajesh-sapkale/spring-petclinic.git'
+      stage('Build app') {
           sh 'mvn clean package'
+      }
+      stage('Test') {
           junit '**/target/surefire-reports/TEST-*.xml'
+      }
+      stage('Push to artifactory') {
+          archiveArtifacts artifacts:'target/*.jar', fingerprint:true
+          //Push to artifactory
       }
     }
   }
+}
