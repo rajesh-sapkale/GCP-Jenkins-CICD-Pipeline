@@ -1,11 +1,11 @@
-def label = "maven-${UUID.randomUUID().toString()}"
+def slavepod = "maven-${UUID.randomUUID().toString()}"
 
 podTemplate(label: label, yaml: """
 apiVersion: v1
 kind: Pod
 metadata:
   labels:
-    some-label: some-label-value
+    app: sample
 spec:
   containers:
   - name: maven
@@ -18,7 +18,7 @@ spec:
       value: container-env-var-value
 """
   ) {
-  node(label) {
+  node(slavepod) {
     container('maven') {
       stage('Git checkout	') {
           git 'https://github.com/rajesh-sapkale/spring-petclinic.git'
