@@ -13,9 +13,11 @@ spec:
     command:
     - cat
     tty: true
-    env:
-    - name: CONTAINER_ENV_VAR
-      value: container-env-var-value
+  - name: sonarqube-scanner
+    image: newtmitch/sonar-scanner
+    command:
+    - cat
+    tty: true
 """
   ) {
   node(slavepod) {
@@ -23,14 +25,17 @@ spec:
       stage('Git checkout	') {
           git 'https://github.com/rajesh-sapkale/spring-petclinic.git'
       }
-      stage('Static code analysis') {
-
-      }
       stage('Build app') {
           sh 'mvn clean package'
       }
       stage('Test') {
           junit '**/target/surefire-reports/TEST-*.xml'
+      }
+      stage('Static code analysis') {
+          withSonarQubeEnv('sonarqube') {
+           // requires SonarQube Scanner for Maven 3.2+
+            sh 'mvn sonar:sonar'
+         }
       }
       stage('Code coverage') {
 
