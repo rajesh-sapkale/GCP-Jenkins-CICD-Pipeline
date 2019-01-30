@@ -1,52 +1,44 @@
-def slavepod = "slavepod-${UUID.randomUUID().toString()}"
+  def slavepod = "slavepod-${UUID.randomUUID().toString()}"
 
-podTemplate(label: slavepod, yaml: """
-apiVersion: v1
-kind: Pod
-metadata:
-  labels:
-    app: sample
-spec:
-  containers:
-  - name: maven
-    image: maven:3.3.9-jdk-8-alpine
-    command:
-    - cat
-    tty: true
-  - name: sonarqube-scanner
-    image: newtmitch/sonar-scanner
-    command:
-    - cat
-    tty: true
-"""
-  ) {
-  node(slavepod) {
-    container('maven') {
-      stage('Git checkout	') {
-          git 'https://github.com/rajesh-sapkale/spring-petclinic.git'
-      }
-      stage('Build app') {
-          sh 'mvn clean package'
-      }
-      stage('Test') {
-          junit '**/target/surefire-reports/TEST-*.xml'
-      }
-      stage('Static code analysis') {
-          withSonarQubeEnv('sonarqube') {
-           // requires SonarQube Scanner for Maven 3.2+
-            sh 'mvn sonar:sonar'
-         }
-      }
-      stage('Code coverage') {
+  podTemplate(label: slavepod, yaml: """
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    labels:
+      app: sample
+  spec:
+    containers:
+    - name: maven
+      image: maven:3.6.0-jdk-8-alpine
+      command:
+      - cat
+      tty: true
+  """
+    ) {
+    node(slavepod) {
+      container('maven') {
+        stage('Git checkout	') {
+            git 'https://github.com/rajesh-sapkale/spring-petclinic.git'
+        }
+        stage('Build app') {
+            sh 'mvn clean package'
+        }
+        stage('Test') {
+            junit '**/target/surefire-reports/TEST-*.xml'
+        }
+        stage('SonarQube quality gate') {
+            withSonarQubeEnv('sonarqube') {
+              //sh 'mvn sonar:sonar'
+              sh 'mvn sonar:sonar -Dsonar.projectKey=rajesh-sapkale_spring-petclinic -Dsonar.organization=rajesh-sapkale-github -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=80805a592d39b2d4e2443fc442cb77dc74532859'
+           }
+        }
+        stage('Push to artifactory') {
+            //archiveArtifacts artifacts:'target/*.jar', fingerprint:true
+            //Push to artifactory
+        }
+        stage('Dockerimage push') {
 
-      }
-      stage('Push to artifactory') {
-          archiveArtifacts artifacts:'target/*.jar', fingerprint:true
-          //Push to artifactory
-      }
-      stage('Dockerimage push') {
-
+        }
       }
     }
   }
-}
