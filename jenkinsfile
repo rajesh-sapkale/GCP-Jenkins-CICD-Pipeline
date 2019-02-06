@@ -17,7 +17,7 @@
     ) {
     node(slavepod) {
       container('maven') {
-        stage('Git checkout	') {
+        stage('Git checkout') {
             git 'https://github.com/rajesh-sapkale/spring-petclinic.git'
         }
         stage('Build app') {
@@ -33,8 +33,8 @@
            }
         }
         stage('Push to artifactory') {
-            //archiveArtifacts artifacts:'target/*.jar', fingerprint:true
-            //Push to artifactory
+              archiveArtifacts artifacts:'target/*.jar', fingerprint:true
+              sh 'mvn deploy'
         }
         stage('Dockerimage push') {
 

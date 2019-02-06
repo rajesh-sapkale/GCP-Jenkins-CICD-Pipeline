@@ -13,9 +13,11 @@ spec:
     command:
     - cat
     tty: true
-    env:
-    - name: CONTAINER_ENV_VAR
-      value: container-env-var-value
+  - name: sonarqube-scanner
+    image: newtmitch/sonar-scanner
+    command:
+    - cat
+    tty: true
 """
   ) {
   node(slavepod) {
@@ -23,20 +25,20 @@ spec:
       stage('Git checkout	') {
           git 'https://github.com/rajesh-sapkale/spring-petclinic.git'
       }
-      stage('Static code analysis') {
-
-      }
       stage('Build app') {
           sh 'mvn clean package'
       }
       stage('Test') {
           junit '**/target/surefire-reports/TEST-*.xml'
       }
-      stage('Code coverage') {
-
+      stage('SonarQube Quality Gate') {
+          withSonarQubeEnv('sonarqube') {
+            //sh 'mvn sonar:sonar'
+            sh 'mvn sonar:sonar -Dsonar.projectKey=rajesh-sapkale_spring-petclinic -Dsonar.organization=rajesh-sapkale-github -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=80805a592d39b2d4e2443fc442cb77dc74532859'
+         }
       }
       stage('Push to artifactory') {
-          archiveArtifacts artifacts:'target/*.jar', fingerprint:true
+          //archiveArtifacts artifacts:'target/*.jar', fingerprint:true
           //Push to artifactory
       }
       stage('Dockerimage push') {
