@@ -1,0 +1,40 @@
+def slavepod = "slavepod-${UUID.randomUUID().toString()}"
+
+podTemplate(name: 'kaniko', label: slavepod, yaml: """
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kaniko
+  namespace: jenkins
+spec:
+  containers:
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug
+    imagePullPolicy: Always
+    command:
+    - /busybox/cat
+    tty: true
+    volumeMounts:
+      - name: kaniko-secret
+        mountPath: /secret
+    env:
+      - name: GOOGLE_APPLICATION_CREDENTIALS
+        value: /secret/kaniko-secret.json
+  volumes:
+    - name: kaniko-secret
+      secret:
+        secretName: kaniko-secret
+"""
+  ) {
+  node(slavepod) {
+    container('kaniko') {
+      stage('Docker build and push to registry') {
+            sh "echo rajesh"
+            sh "docker -v"
+            sh '''#!/busybox/sh
+            /kaniko/executor -f `pwd`/Dockerfile -c gs://dummyapp/context.tar.gz --destination=gcr.io/tms-common01/dummyapppipeline:1.0
+            '''
+        }
+     }
+   }
+ }
