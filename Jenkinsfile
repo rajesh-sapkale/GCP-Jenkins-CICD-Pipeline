@@ -68,11 +68,10 @@ spec:
       }
       stage('Push to artifactory') {
             server.publishBuildInfo buildInfo
-      }
-      stage('Context build') {
-        sh "cp ./target/*.jar ./dockerbuild/context"
-        sh "tar -C ./dockerbuild/context -zcvf context.tar.gz ."
-        sh "cp  context.tar.gz /home"
+
+            //context building for Kaniko
+            sh "cp ./target/*.jar ./dockerbuild/context"
+            sh "cp -r ./dockerbuild/context /home"
       }
     }
     container('kaniko') {
@@ -80,7 +79,7 @@ spec:
         container(name: 'kaniko', shell: '/busybox/sh') {
           withEnv(['PATH+EXTRA=/busybox:/kaniko']) {
           sh '''#!/busybox/sh
-          /kaniko/executor -f Dockerfile -c /home/context.tar.gz --cache=true --destination=gcr.io/tms-common01/dummyapp:8.0 '''
+          /kaniko/executor --dockerfile=Dockerfile --context=/home/context --cache=true --destination=gcr.io/tms-common01/dummyapppoc:2.0'''
           }
         }
       }
