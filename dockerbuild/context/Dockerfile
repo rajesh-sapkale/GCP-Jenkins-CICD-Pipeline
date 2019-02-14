@@ -1,5 +1,3 @@
-FROM java:8
-MAINTAINER rajesh.sapkale
-COPY *.jar /home/
-EXPOSE 8080
-CMD ["java","-jar","/home/*.jar"]
+from ubuntu:latest
+
+cmd ["echo", "'TGIK is the best way to learn Kubernetes!'", "&&", "sleep", "1000"]

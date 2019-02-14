@@ -46,7 +46,8 @@ spec:
     def buildInfo
     container('maven') {
       stage('Git checkout') {
-          git 'https://github.com/rajesh-sapkale/spring-petclinic.git'
+          // git 'https://github.com/rajesh-sapkale/spring-petclinic.git'
+             git branch: 'stg', url: 'https://github.com/rajesh-sapkale/spring-petclinic.git'
       }
       stage('Build app') {
           // Set Artifactory repositories for dependencies resolution and artifacts deployment.
@@ -68,9 +69,20 @@ spec:
       stage('Push to artifactory') {
             server.publishBuildInfo buildInfo
       }
-      stage('context build') {
-        sh 'cp **/target/*.jar **/dockerbuild/context'
-        sh 'tar -C **/dockerbuild/context -zcvf context.tar.gz .'
+      stage('Context build') {
+        sh "cp ./target/*.jar ./dockerbuild/context"
+        sh "tar -C ./dockerbuild/context -zcvf context.tar.gz ."
+        sh "cp  context.tar.gz /home"
+      }
+    }
+    container('kaniko') {
+      stage('Build with Kaniko') {
+        container(name: 'kaniko', shell: '/busybox/sh') {
+          withEnv(['PATH+EXTRA=/busybox:/kaniko']) {
+          sh '''#!/busybox/sh
+          /kaniko/executor -f Dockerfile -c /home/context.tar.gz --cache=true --destination=gcr.io/tms-common01/dummyapp:8.0 '''
+          }
+        }
       }
     }
   }
