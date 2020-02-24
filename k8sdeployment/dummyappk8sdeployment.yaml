@@ -1,0 +1,17 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: dummyapp
+  namespace: jenkins
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dummyapp
+    spec:
+      containers:
+      - name: dummyapp
+        image: gcr.io/XXXXXX/dummyapppoc:2.0
+        ports:
+        - containerPort: 8080
